@@ -1,0 +1,27 @@
+Demos brainstorm:
+- Superhuman speed: craft hundreds of phishing messages
+- Security: simple sql injection with a flask server
+- Security: password cracking with flask server
+- Steganography: show that two instances of GPT can pass a secret message between one another
+- Examples of 4o encouraging psychosis
+    - https://www.reddit.com/r/ChatGPT/comments/1kalae8/chatgpt_induced_psychosis/
+    - https://x.com/AISafetyMemes/status/1916889492172013989
+    - https://thezvi.substack.com/p/gpt-4o-is-an-absurd-sycophant
+    - https://thezvi.substack.com/p/gpt-4o-responds-to-negative-feedback
+    - https://thezvi.substack.com/p/gpt-4o-sycophancy-post-mortem
+- Examples of Pliny jailbreaks with bioterrorism
+    - https://x.com/elder_plinius/status/1794108260967936280
+- Examples of o3 doxxing people from photos
+    - https://x.com/KelseyTuoc/status/1917340813715202540
+    - https://www.astralcodexten.com/p/testing-ais-geoguessr-genius
+- Examples of gpt being highly persuasive
+    - https://thezvi.substack.com/i/162065500/change-my-mind
+    - https://old.reddit.com/r/changemyview/comments/1k8b2hj/meta_unauthorized_experiment_on_cmv_involving/
+        - AI pretending to be a victim of rape
+        - AI acting as a trauma counselor specializing in abuse
+        - AI accusing members of a religious group of "caus[ing] the deaths of hundreds of innocent traders and farmers and villagers."
+        - AI posing as a black man opposed to Black Lives Matter
+        - AI posing as a person who received substandard care in a foreign hospital.
+    - https://thezvi.substack.com/i/151031643/deepfaketown-and-botpocalypse-soon
+- Examples of o3 lying and making up sources
+- https://thezvi.wordpress.com/2025/04/23/o3-is-a-lying-liar/
