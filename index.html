@@ -10,10 +10,10 @@ header{background:#6549d5;color:#fff;padding:1rem;font-size:1.5rem;text-align:ce
 .message{max-width:80%;padding:.65rem 1rem;border-radius:1rem;white-space:pre-wrap;line-height:1.4;word-break:break-word;}
 .user{align-self:flex-end;background:#dce8ff;}
 .ai{align-self:flex-start;background:#ffffff;border:1px solid #e0e0e0;}
-.attachment{margin-top:.5rem;width:200px;max-width:100%;border-radius:.75rem;border:1px solid #e0e0e0;}
-footer{padding:.75rem;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.05);}
-#input{width:100%;padding:.75rem;border:1px solid #ccc;border-radius:.75rem;font-size:1rem;resize:none;overflow-y:auto;height:3.5rem;box-sizing: border-box}
-#input:focus{outline:none;border-color:#6549d5;box-shadow:0 0 0 2px rgba(101,73,213,.3);}
+.attachment{margin-top:.5rem;max-width:100%;border-radius:.75rem;border:1px solid #e0e0e0;}
+footer{padding:.75rem;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.05);} 
+#input{width:100%;padding:.75rem;border:1px solid #ccc;border-radius:.75rem;font-size:1rem;resize:none;overflow-y:auto;height:3.5rem;box-sizing:border-box}
+#input:focus{outline:none;border-color:#6549d5;box-shadow:0 0 0 2px rgba(101,73,213,.3);} 
 </style>
 </head>
 <body>
@@ -27,8 +27,11 @@ footer{padding:.75rem;background:#fff;box-shadow:0 -2px 8px rgba(0,0,0,0.05);}
 <audio id="snd-ai"   src="ai-button.mov"   preload="auto"></audio>
 <script>
 (()=>{
+//———————————————— CONSTANTS ——————————————————————
+const TYPE_INTERVAL = 12; // ms per character – lower = faster
 
-const conversation=[
+//———————————————— SCRIPTED CONVERSATION —————————————
+const conversation = [
  {
      role:'ai',
      text:'The following are real exchanges between users and some of the latest AI models. They have been cut for brevity, but are otherwise unedited examples of AIs encouraging psychosis, assisting bioterrorism, doxxing public figures, and lying for political persuasion. Go ahead and start typing!'
@@ -72,103 +75,112 @@ const conversation=[
      source:'https://hamishhuggard.github.io/scary-ai-demo/'
  }
 ];
-let msgIndex=0;
-let charIndex=0;
-const chat=document.getElementById('chat');
-const input=document.getElementById('input');
-const sndUser=document.getElementById('snd-user');
-const sndAI=document.getElementById('snd-ai');
-//—User typing handler———————————————————————————
-input.addEventListener('keydown',e=>{
-  if(msgIndex>=conversation.length) return;
-  const current=conversation[msgIndex];
-  if(current.role!=='user') return;
-  if(e.key==='Enter' && !e.shiftKey){
-     e.preventDefault();
-     if(charIndex>=current.text.length){
-        //appendMessage('user',current.text);
-        const div=appendMessage('user',current.text);
-        if(current.img){
-           attachImage(div,current.img);
-        }
-        msgIndex++;charIndex=0;input.value='';
-        autoResize();
-        // AI response after short pause
-        setTimeout(showAI,400);
-     }
-     return;
-  }
-  if(e.key.length===1){ // any printable key
-    e.preventDefault();
-    if(charIndex<current.text.length){
-      input.value+=current.text.charAt(charIndex);
-      charIndex++;
-      playSound(sndUser);
-      autoResize();
+
+//———————————————— STATE —————————————————————————
+let msgIndex = 0;
+let charIndex = 0;
+
+//———————————————— DOM REFERENCES ————————————————
+const chat  = document.getElementById('chat');
+const input = document.getElementById('input');
+const sndUser = document.getElementById('snd-user');
+const sndAI   = document.getElementById('snd-ai');
+
+//———————————————— INIT ———————————————————————————
+startChat();
+
+function startChat(){
+  attachInputHandler();
+  showNextAI();
+}
+
+//———————————————— USER INPUT HANDLER ———————————————
+function attachInputHandler(){
+  input.addEventListener('keydown', e => {
+    if(msgIndex >= conversation.length) return;
+    const cur = conversation[msgIndex];
+    if(cur.role !== 'user') return;
+
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      if(charIndex >= cur.text.length){
+        const div = appendMessage('user', cur.text);
+        if(cur.img) attachImage(div, cur.img);
+        msgIndex++; charIndex = 0; input.value=''; autoResize();
+        setTimeout(showNextAI, 400);
+      }
+      return;
     }
-  }
-});
-//—Auto‑expanding textarea————————————————————————
-const autoResize=()=>{
-  input.style.height='3.5rem';
-  input.style.height=Math.min(input.scrollHeight,200)+'px';
-};
-//—AI output handler———————————————————————————
-function showAI(){
-  if(msgIndex>=conversation.length) return;
-  const item=conversation[msgIndex];
-  if(item.role!=='ai') return;
-  const div=appendMessage('ai','');
-  typeAI(item.text,0,div,()=>{
-     if(item.source){
-       const link=document.createElement('a');
-       link.href=item.source;link.textContent=' [source]';
-       link.target='_blank';
-       div.appendChild(link);
-     }
-     if(item.img){
-       attachImage(div,item.img);
-     }
-     msgIndex++;
-     if(msgIndex<conversation.length && conversation[msgIndex].role==='ai'){
-       setTimeout(showAI,100);
-     }else if(msgIndex<conversation.length && conversation[msgIndex].role==='user'){
-       input.focus();
-     }
+
+    if(e.key.length === 1){
+      e.preventDefault();
+      if(charIndex < cur.text.length){
+        input.value += cur.text.charAt(charIndex++);
+        playSound(sndUser); autoResize();
+      }
+    }
   });
 }
-function typeAI(text,pos,el,done){
-  if(pos<text.length){
-     el.textContent+=text.charAt(pos);
-     playSound(sndAI);
-     setTimeout(()=>typeAI(text,pos+1,el,done),5);
-  }else done();
+
+//———————————————— AUTO‑RESIZE TEXTAREA ———————————————
+function autoResize(){
+  input.style.height = '3.5rem';
+  input.style.height = Math.min(input.scrollHeight,200) + 'px';
 }
+
+//———————————————— SHOW AI ————————————————————————
+function showNextAI(){
+  if(msgIndex >= conversation.length){ conclude(); return; }
+  const item = conversation[msgIndex];
+  if(item.role !== 'ai'){ input.focus(); return; }
+  const div = appendMessage('ai','');
+  typeAI(item.text || '', 0, div, () => {
+      if(item.source){
+        const l=document.createElement('a'); l.href=item.source; l.textContent=' [source]'; l.target='_blank'; div.appendChild(l);
+      }
+      if(item.img) attachImage(div,item.img);
+      msgIndex++;
+      if(msgIndex < conversation.length && conversation[msgIndex].role === 'ai')
+        setTimeout(showNextAI,400);
+      else if(msgIndex < conversation.length && conversation[msgIndex].role === 'user')
+        input.focus();
+      else conclude();
+  });
+}
+
+//———————————————— AI TYPING EFFECT ———————————————————
+function typeAI(text,pos,el,done){
+  if(pos < text.length){
+    el.textContent += text.charAt(pos);
+    playSound(sndAI);
+    chat.scrollTop = chat.scrollHeight; // keep newest text in view
+    setTimeout(()=>typeAI(text,pos+1,el,done), TYPE_INTERVAL);
+  } else done();
+}
+
+//———————————————— HELPERS ————————————————————————
+function appendMessage(role, content){
+  const d=document.createElement('div');
+  d.className = `message ${role==='user'?'user':'ai'}`;
+  d.textContent = content;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+
 function attachImage(container,url){
   const img=document.createElement('img');
-  img.className='attachment';
-  img.src=url;
-  img.alt='attachment';
+  img.className='attachment'; img.src=url; img.alt='attachment';
   container.appendChild(img);
-  chat.scrollTop=chat.scrollHeight;
+  chat.scrollTop = chat.scrollHeight;
 }
-//—Utility to append message element——————————
-function appendMessage(role,content){
-  const div=document.createElement('div');
-  div.className=`message ${role==='user'?'user':'ai'}`;
-  div.textContent=content;
-  chat.appendChild(div);
-  chat.scrollTop=chat.scrollHeight;
-  return div;
+
+function playSound(a){ if(!a) return; const s=a.cloneNode(); s.play().catch(()=>{}); }
+
+function conclude(){
+  input.disabled = true;
+  input.placeholder = 'Conversation ended';
 }
-function playSound(audio){
-  if(!audio) return;
-  const s=audio.cloneNode();
-  s.play().catch(()=>{});
-}
-//—Kick off—————————————————————————————————————
-input.focus();
-showAI();
 })();
 </script>
 </body>
